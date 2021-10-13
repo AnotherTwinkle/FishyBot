@@ -39,6 +39,12 @@ class FishyBot(commands.Bot):
         print("------------------------------------")
 
 
+    async def on_command_error(self, ctx, err):
+        if isinstance(err, commands.MemberNotFound):
+            await ctx.reply("Please mention properly.", mention_author=False)
+            return
+
+
     async def process_commands(self, msg):
         ctx = await self.get_context(msg, cls=commands.Context)
 

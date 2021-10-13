@@ -43,9 +43,6 @@ class Chess(commands.Cog, name = 'Chess Commands'):
         if opponent is None:
             await ctx.reply("Mention someone to challenge :|", mention_author=False)
             return
-        if not isinstance(opponent, discord.Member):
-            await ctx.reply("Please mention opponent properly.", mention_author=False)
-            return
         if opponent == ctx.author:
             await ctx.reply("Hmm... So you want to challenge yourself. Open a analysis board instead! :thinking:", mention_author=False)
             return
