@@ -1,4 +1,4 @@
-from bot import FishyBot
+from bot_setup import FishyBot
 from dotenv import load_dotenv
 
 def main():
