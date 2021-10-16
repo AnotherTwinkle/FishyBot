@@ -58,21 +58,17 @@ async def challenge_creator(self, ctx, opponent, games_col, reg_user_col):
         game_id = random_string(20)
 
         try:
-            existing = reg_user_col.find_one({'_id':first_mover.id})['games']
             reg_user_col.update_one({'_id':first_mover.id}, {'$set':{
                 "is_playing": True,
                 "playing_as_color": "white",
                 "current_game_id": game_id,
                 "opponent": second_mover.id,
-                "games": existing.append(game_id)
             }})
-            existing = reg_user_col.find_one({'_id':second_mover.id})['games']
             reg_user_col.update_one({'_id':second_mover.id}, {'$set':{
                 "is_playing": True,
                 "playing_as_color": "black",
                 "current_game_id": game_id,
                 "opponent": first_mover.id,
-                "games": existing.append(game_id)
             }})
             games_col.insert_one(make_game(first_mover, second_mover, game_id))
             await ctx.reply("Game created successfully", mention_author=False)
@@ -111,7 +107,6 @@ def make_user(userid):
         "have_analysis_board": False,
         "current_analysis_board_id": None,
         "opponent": None,
-        "games": [],
         "reg_time": datetime.now()
     }
     return user_dict
