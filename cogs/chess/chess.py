@@ -44,7 +44,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
             await ctx.reply("Mention someone to challenge :|", mention_author=False)
             return
         if opponent == ctx.author:
-            await ctx.reply("Hmm... So you want to challenge yourself. Open a analysis board instead! :thinking:", mention_author=False)
+            await ctx.reply("Hmm... So you want to challenge yourself. Open an analysis board instead! :thinking:", mention_author=False)
             return
 
         reg_user_col = setup_db_collection(db_name, registered_user_collection)
@@ -52,7 +52,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
             await ctx.reply("Please register first.", mention_author=False)
             return
         if not registered_user(opponent.id, reg_user_col):
-            await ctx.reply("The person you are asking to play haven\'t registered yet.", mention_author=False)
+            await ctx.reply("The person you are asking to play hasn\'t registered yet.", mention_author=False)
             return
 
 
@@ -63,7 +63,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
             await ctx.reply("You'r opponent is already in a game", mention_author=False)
             return
 
-        challenge_message = await ctx.send(f"Hey {opponent.mention}! You If you want to accept challenge react with 👍")
+        challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you to a chess game. If you want to accept challenge react with 👍")
         await challenge_message.add_reaction("👍")
         def accept(reaction, user):
             return user == opponent and str(reaction.emoji) == '👍'
@@ -72,7 +72,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
         except asyncio.TimeoutError:
             await ctx.send('No response...\nChallenge declined')
         else:
-            await ctx.send('Challenge accepted... Let the game begin !!!')
+            await ctx.send('Challenge accepted... Let the game begin!!!')
             players = [ctx.author, opponent]
             first_mover = random.choice(players)
             players.remove(first_mover)
