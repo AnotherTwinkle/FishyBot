@@ -39,7 +39,29 @@ async def challenge_checker(ctx, opponent):
     return reg_user_col
 
 
-async def challenge_creator(self, ctx, opponent, games_col, reg_user_col):
+async def challenge_creator(self, ctx, opponent, games_col, reg_user_col, args):
+    varients = ["suicide", "giveaway", "antichess", "atomic", "kingofthehill", "racingkings", "horde", "3check", "crazyhouse"]
+    varient = [False, "standard"]
+    if len(args) > 2:
+        await ctx.reply("Specify the arguments properly :/", mention_author=False)
+        return
+    elif len(args) == 2:
+        if not ((args[0].lower() == "chess960") and (args[1].lower() in varients)):
+            await ctx.reply("Specify the arguments properly :/", mention_author=False)
+            return
+        else:
+            varient = [True, args[1].lower()]
+    elif len(args) == 1:
+        if not ((args[0].lower() == "chess960") or (args[0].lower() in varients)):
+            await ctx.reply("Specify the arguments properly :/", mention_author=False)
+            return
+        else:
+            if args[0].lower() == "chess960":
+                varient = [True, "standard"]
+            else:
+                varient = [False, args[0].lower()]
+
+
     challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you for a chess game. If you want to accept challenge react with 👍")
     await challenge_message.add_reaction("👍")
     def accept(reaction, user):
@@ -70,7 +92,7 @@ async def challenge_creator(self, ctx, opponent, games_col, reg_user_col):
                 "current_game_id": game_id,
                 "opponent": first_mover.id,
             }})
-            games_col.insert_one(make_game(first_mover, second_mover, game_id))
+            games_col.insert_one(make_game(first_mover, second_mover, game_id, varient))
             await ctx.reply("Game created successfully", mention_author=False)
             await ctx.send(f'Game id: `{game_id}`')
             await ctx.send(f'{first_mover.mention} will move first as white')
@@ -115,12 +137,17 @@ def check_current_game(userid, reg_col):
     user_dict = get_user(userid, reg_col)
     return user_dict["is_playing"]
 
-def make_game(first_mover, second_mover, game_id):
+def make_game(first_mover, second_mover, game_id, varients):
     user_dict = {
         "_id": game_id,
         "white": first_mover.id,
         "black": second_mover.id,
+        "is_chess960": varients[0],
+        "varient": varients[1],
         "PGN": "",
         "start_time": datetime.now()
     }
     return user_dict
+
+def varient_ditector():
+    pass

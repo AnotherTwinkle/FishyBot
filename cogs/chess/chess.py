@@ -37,7 +37,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
 
 
     @commands.command(name="challenge", aliases=["cl"])
-    async def challenge(self, ctx,  opponent: discord.Member = None):
+    async def challenge(self, ctx,  opponent: discord.Member = None, *args):
         checker_bool = await challenge_checker(ctx, opponent)
         if checker_bool is None:
             return
@@ -49,9 +49,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
                 games_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.games_collection)
             except Exception:
                 await ctx.reply("Something went wrong!", mention_author=False)
-            
-        
-        await challenge_creator(self, ctx, opponent, games_col, reg_user_col)
+        await challenge_creator(self, ctx, opponent, games_col, reg_user_col, args)
         return
 
 
