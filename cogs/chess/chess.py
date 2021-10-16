@@ -35,7 +35,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
     @commands.command(name="challenge", aliases=["cl"])
     async def challenge(self, ctx,  opponent: discord.Member = None):
         reg_user_col = await challenge_checker(ctx, opponent)
-        if reg_user_col is not None:
+        if reg_user_col is None:
             return
         
         challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you for a chess game. If you want to accept challenge react with 👍")
@@ -54,7 +54,7 @@ class Chess(commands.Cog, name = 'Chess Commands'):
             players.remove(first_mover)
             second_mover = players[0]
             game_id = random_string(20)
-            
+
             try:
                 reg_user_col.insert_one(make_game(first_mover, second_mover, game_id))
                 await ctx.reply("Game created successfully", mention_author=False)
