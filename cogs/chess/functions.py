@@ -36,10 +36,10 @@ async def challenge_checker(ctx, opponent):
     if check_current_game(opponent.id, reg_user_col):
         await ctx.reply("The person you are challenging is already in a game.", mention_author=False)
         return None
-    return True
+    return reg_user_col
 
 
-async def challenge_creator(self, ctx, opponent, games_col):
+async def challenge_creator(self, ctx, opponent, games_col, reg_user_col):
     challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you for a chess game. If you want to accept challenge react with 👍")
     await challenge_message.add_reaction("👍")
     def accept(reaction, user):
@@ -58,6 +58,22 @@ async def challenge_creator(self, ctx, opponent, games_col):
         game_id = random_string(20)
 
         try:
+            existing = reg_user_col.find_one({'_id':first_mover.id})['games']
+            reg_user_col.update_one({'_id':first_mover.id}, {'$set':{
+                "is_playing": True,
+                "playing_as_color": "white",
+                "current_game_id": game_id,
+                "opponent": second_mover.id,
+                "games": existing.append(game_id)
+            }})
+            existing = reg_user_col.find_one({'_id':second_mover.id})['games']
+            reg_user_col.update_one({'_id':second_mover.id}, {'$set':{
+                "is_playing": True,
+                "playing_as_color": "black",
+                "current_game_id": game_id,
+                "opponent": first_mover.id,
+                "games": existing.append(game_id)
+            }})
             games_col.insert_one(make_game(first_mover, second_mover, game_id))
             await ctx.reply("Game created successfully", mention_author=False)
             await ctx.send(f'Game id: `{game_id}`')

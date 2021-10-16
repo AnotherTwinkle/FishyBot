@@ -44,13 +44,14 @@ class Chess(commands.Cog, name = 'Chess Commands'):
         elif checker_bool == False:
             await ctx.reply("Something went wrong!", mention_author=False)
         else:
+            reg_user_col = checker_bool
             try:
                 games_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.games_collection)
             except Exception:
                 await ctx.reply("Something went wrong!", mention_author=False)
             
         
-        await challenge_creator(self, ctx, opponent, games_col)
+        await challenge_creator(self, ctx, opponent, games_col, reg_user_col)
         return
 
 
