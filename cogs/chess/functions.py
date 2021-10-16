@@ -18,8 +18,11 @@ async def challenge_checker(ctx, opponent):
     if opponent == ctx.author:
         await ctx.reply("Hmm... So you want to challenge yourself. Open an analysis board instead! :thinking:", mention_author=False)
         return None
-
-    reg_user_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.registered_user_collection)
+    try:
+        reg_user_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.registered_user_collection)
+    except:
+        return False
+    
     if not registered_user(ctx.author.id, reg_user_col):
         await ctx.reply("Please register first.", mention_author=False)
         return None
@@ -33,10 +36,35 @@ async def challenge_checker(ctx, opponent):
     if check_current_game(opponent.id, reg_user_col):
         await ctx.reply("The person you are challenging is already in a game.", mention_author=False)
         return None
-    return reg_user_col
+    return True
 
 
+async def challenge_creator(self, ctx, opponent, games_col):
+    challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you for a chess game. If you want to accept challenge react with 👍")
+    await challenge_message.add_reaction("👍")
+    def accept(reaction, user):
+        return user == opponent and str(reaction.emoji) == '👍'
+    
+    try:
+        await self.bot.wait_for('reaction_add', timeout=30.0, check=accept)
+    except asyncio.TimeoutError:
+        await ctx.send('No response...\nChallenge declined')
+    else:
+        await ctx.send('Challenge accepted... Let the game begin!!!')
+        players = [ctx.author, opponent]
+        first_mover = random.choice(players)
+        players.remove(first_mover)
+        second_mover = players[0]
+        game_id = random_string(20)
 
+        try:
+            games_col.insert_one(make_game(first_mover, second_mover, game_id))
+            await ctx.reply("Game created successfully", mention_author=False)
+            await ctx.send(f'Game id: `{game_id}`')
+            await ctx.send(f'{first_mover.mention} will move first as white')
+        except Exception:
+            await ctx.reply("Something went wrong!", mention_author=False)
+    return
 
 
 def random_string(len):

@@ -19,7 +19,11 @@ class Chess(commands.Cog, name = 'Chess Commands'):
 
     @commands.command(name="register", aliases=["reg"])
     async def register(self, ctx):
-        reg_user_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.registered_user_collection)
+        try:
+            reg_user_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.registered_user_collection)
+        except Exception:
+            await ctx.reply("Something went wrong!", mention_author=False)
+        
         if registered_user(ctx.author.id, reg_user_col):
             await ctx.reply("You have already registered dude :/", mention_author=False)
             return
@@ -34,35 +38,20 @@ class Chess(commands.Cog, name = 'Chess Commands'):
 
     @commands.command(name="challenge", aliases=["cl"])
     async def challenge(self, ctx,  opponent: discord.Member = None):
-        reg_user_col = await challenge_checker(ctx, opponent)
-        if reg_user_col is None:
+        checker_bool = await challenge_checker(ctx, opponent)
+        if checker_bool is None:
             return
-        
-        challenge_message = await ctx.send(f"Hey {opponent.mention}! {ctx.author.mention} challenged you for a chess game. If you want to accept challenge react with 👍")
-        await challenge_message.add_reaction("👍")
-        def accept(reaction, user):
-            return user == opponent and str(reaction.emoji) == '👍'
-        
-        try:
-            await self.bot.wait_for('reaction_add', timeout=30.0, check=accept)
-        except asyncio.TimeoutError:
-            await ctx.send('No response...\nChallenge declined')
+        elif checker_bool == False:
+            await ctx.reply("Something went wrong!", mention_author=False)
         else:
-            await ctx.send('Challenge accepted... Let the game begin!!!')
-            players = [ctx.author, opponent]
-            first_mover = random.choice(players)
-            players.remove(first_mover)
-            second_mover = players[0]
-            game_id = random_string(20)
-
             try:
-                reg_user_col.insert_one(make_game(first_mover, second_mover, game_id))
-                await ctx.reply("Game created successfully", mention_author=False)
-                await ctx.send(f'Game id: `{game_id}`')
-                await ctx.send(f'{first_mover.mention} will move first as white')
+                games_col = db_setup.setup_db_collection(db_setup.db_name, db_setup.games_collection)
             except Exception:
                 await ctx.reply("Something went wrong!", mention_author=False)
-            return
+            
+        
+        await challenge_creator(self, ctx, opponent, games_col)
+        return
 
 
 
