@@ -85,12 +85,14 @@ async def challenge_creator(self, ctx, opponent, games_col, reg_user_col, args):
                 "playing_as_color": "white",
                 "current_game_id": game_id,
                 "opponent": second_mover.id,
+                "is_move": True,
             }})
             reg_user_col.update_one({'_id':second_mover.id}, {'$set':{
                 "is_playing": True,
                 "playing_as_color": "black",
                 "current_game_id": game_id,
                 "opponent": first_mover.id,
+                "is_move": False,
             }})
             games_col.insert_one(make_game(first_mover, second_mover, game_id, varient))
             await ctx.reply("Game created successfully", mention_author=False)
@@ -126,6 +128,7 @@ def make_user(userid):
         "is_playing": False,
         "playing_as_color": None,
         "current_game_id": None,
+        "is_move": None,
         "have_analysis_board": False,
         "current_analysis_board_id": None,
         "opponent": None,
@@ -143,8 +146,11 @@ def make_game(first_mover, second_mover, game_id, varients):
         "white": first_mover.id,
         "black": second_mover.id,
         "is_chess960": varients[0],
+        "start_pos": random.randint(0,959) if varients[0] else 518,
         "varient": varients[1],
+        "move": "W",
         "PGN": "",
+        "finished": False,
         "start_time": datetime.now()
     }
     return user_dict
